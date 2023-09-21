@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Train Game</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-image: url("background.png"); 
+            background-size: cover; 
+        }
+        canvas {
+            display: block;
+            width:100%;
+            height: 100vh;            
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="1000" height="700"></canvas>
+    <div id="message"></div>
+    <div id="stats1"></div>
+    <div id="stats2"></div>
+    <script type="text/javascript">
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const redTrain = new Image();
+        redTrain.src = "subwayred.png";
+
+        const silverTrain = new Image();
+        silverTrain.src = "subwaysilver.png";
+
+        const person = new Image();
+        person.src = "person.png";
+
+        const initialPlayerX = canvas.width / 2;
+        const initialPlayerY = canvas.height - 50;
+
+        let playerX = initialPlayerX;
+        let playerY = initialPlayerY;
+        let isOnSilverTrain = false;
+        let minY = 100;
+        let maxY = canvas.height -200
+        const initialRedTrainX = canvas.width;
+        const initialRedTrainY = minY + Math.random() * (maxY - minY);
+        const initialSilverTrainX = canvas.width;
+        const initialSilverTrainY = minY + Math.random() * (maxY - minY);
+        
+        let redTrainX = initialRedTrainX;
+        let redTrainY = initialRedTrainY;
+        let silverTrainX = initialSilverTrainX;
+        let silverTrainY = initialSilverTrainY;
+        
+        const trainSpeed = 20;
+
+        let successCount = 0; 
+        let failureCount = 0; 
+
+        function moveTrains() {
+            redTrainX -= trainSpeed;
+            if (redTrainX + 100 < 0) {
+                redTrainX = canvas.width;
+                redTrainY = minY + Math.random() * (maxY - minY);
+            }
+
+            silverTrainX -= trainSpeed;
+            if (silverTrainX + 100 < 0) {
+                silverTrainX = canvas.width;
+                silverTrainY = minY + Math.random() * (maxY - minY);
+            }
+        }
+
+        function checkCollisions() {
+            if (playerX + 50 > redTrainX && playerX < redTrainX + 100 && playerY + 50 > redTrainY && playerY < redTrainY + 50) {
+                alert("빨간색 열차에 닿았습니다. 실패!");
+                failureCount++; 
+                resetGame();
+            }
+
+            if (!isOnSilverTrain && playerX + 50 > silverTrainX && playerX < silverTrainX + 100 && playerY + 50 > silverTrainY && playerY < silverTrainY + 50) {
+                isOnSilverTrain = true;
+                alert("은색 열차에 탑승했습니다. 성공!");
+                successCount++; 
+                silverTrainX = canvas.width;
+                silverTrainY = minY + Math.random() * (maxY - minY);
+                isOnSilverTrain = false;
+            }
+        }
+
+        function resetGame() {
+            playerX = initialPlayerX;
+            playerY = initialPlayerY;
+            isOnSilverTrain = false;
+            redTrainX = initialRedTrainX;
+            redTrainY = initialRedTrainY;
+            silverTrainX = initialSilverTrainX;
+            silverTrainY = initialSilverTrainY;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            moveTrains();
+            
+            ctx.drawImage(redTrain, redTrainX, redTrainY, 100, 50);
+            ctx.drawImage(silverTrain, silverTrainX, silverTrainY, 100, 50);
+            ctx.drawImage(person, playerX, playerY, 50, 50);
+
+            if (!isOnSilverTrain) {
+                ctx.font = "30px 여기어때 잘난체 OTF";
+                ctx.fillStyle = "white";
+                ctx.fillText("은색열차에 탑승하세요!", canvas.width / 2 - 150, 50);
+            }
+
+            checkCollisions();
+            document.getElementById("stats1").style.position = "absolute";
+            document.getElementById("stats1").style.top = "20px"; 
+            document.getElementById("stats1").style.right = "20px"
+            document.getElementById("stats1").style.font = "18px 여기어때 잘난체 OTF"
+            document.getElementById("stats1").style.color = "yellow"; 
+
+            document.getElementById("stats1").innerHTML = `실패: ${failureCount}`;
+            document.getElementById("stats2").style.position = "absolute";
+            document.getElementById("stats2").style.top = "20px"; 
+            document.getElementById("stats2").style.right = "80px"
+            document.getElementById("stats2").style.font = "18px 여기어때 잘난체 OTF"
+            document.getElementById("stats2").style.color = "yellow"; 
+
+            document.getElementById("stats2").innerHTML = `성공: ${successCount},`;
+
+            requestAnimationFrame(draw);
+        }
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "ArrowLeft" && playerX > 0) {
+                playerX -= 20;
+            } else if (event.key === "ArrowRight" && playerX < canvas.width - 50) {
+                playerX += 20;
+            } else if (event.key === "ArrowUp" && playerY > 0) {
+                playerY -= 20;
+            } else if (event.key === "ArrowDown" && playerY < canvas.height - 50) {
+                playerY += 20;
+            }
+        });
+
+        draw();
+    </script>
+</body>
+</html>
